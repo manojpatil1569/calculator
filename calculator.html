@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <style>
+    :root {
+      --primary-color: #4a6fa5;
+      --secondary-color: #166088;
+      --accent-color: #4FC3A1;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --button-text: #fff;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url(material/natureback.jpg);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(8px);
+      transform: scale(1.1);
+      z-index: -1;
+    }
+
+    .calculator-container {
+      background: linear-gradient(145deg, #d10c0c, #f0f0f0);
+      background-image: url(material/calciback.jpg);
+      background-position: center;
+      background-size: cover;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 25px;
+      width: 100%;
+      max-width: 400px;
+      transition: transform 0.3s ease;
+    }
+
+    .calculator-container:hover {
+      transform: translateY(-5px);
+    }
+
+    h1 {
+      color: white;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+      opacity: 0.8;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(79, 195, 161, 0.2);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .operation {
+      background-color: var(--primary-color);
+      color: var(--button-text);
+    }
+
+    .special {
+      background-color: var(--secondary-color);
+      color: var(--button-text);
+    }
+
+    .scientific {
+      background-color: var(--accent-color);
+      color: var(--button-text);
+    }
+
+    .digit {
+      background-color: #ffffff;
+      color: var(--text-color);
+      border: 1px solid #ddd;
+    }
+
+    .result-display {
+      background-color: #fff;
+      opacity: 0.8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      min-height: 50px;
+      position: relative;
+    }
+
+    .result-display #result {
+      margin: 0;
+      word-break: break-all;
+      font-size: 1.5rem;
+      color: var(--text-color);
+    }
+
+    .result-display .expression {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 5px;
+      min-height: 20px;
+    }
+
+    .history {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      max-height: 150px;
+      overflow-y: auto;
+      opacity: 0.8;
+    }
+
+    .history h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 1rem;
+    }
+
+    .history-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .dark-mode {
+      --background-color: #2d3436;
+      --text-color: #f5f6fa;
+      --primary-color: #74b9ff;
+      --secondary-color: #0984e3;
+      --accent-color: #55efc4;
+      --button-text: #fff;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .dark-mode .calculator-container {
+      background: linear-gradient(145deg, #3d3d3d, #2d2d2d);
+      background-image: url(material/mainback.jpg);
+      background-position: center;
+      background-size: cover;
+    }
+
+    .dark-mode input,
+    .dark-mode .result-display,
+    .dark-mode .history {
+      background-color: #3d3d3d;
+      color: #f5f6fa;
+      border-color: #555;
+    }
+
+    .dark-mode .digit {
+      background-color: #4d4d4d;
+      color: #f5f6fa;
+      border-color: #555;
+    }
+
+    .dark-mode .history-item {
+      border-bottom-color: #555;
+    }
+
+    @media (max-width: 480px) {
+      .calculator-container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .button-group {
+        gap: 5px;
+      }
+      
+      button {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-container">
+    <h1>Calculator</h1>
+    <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
+    <div class="result-display">
+      <div class="expression" id="expression"></div>
+      <div id="result">0</div>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="input" placeholder="Enter expression..." onkeyup="handleKeyInput(event)">
+    </div>
+
+    <div class="button-group">
+      <button class="special" onclick="clearInput()">C</button>
+      <button class="special" onclick="backspace()">⌫</button>
+      <button class="special" onclick="calculatePercentage()">%</button>
+      <button class="operation" onclick="appendOperator('/')">/</button>
+      
+      <button class="digit" onclick="appendNumber(7)">7</button>
+      <button class="digit" onclick="appendNumber(8)">8</button>
+      <button class="digit" onclick="appendNumber(9)">9</button>
+      <button class="operation" onclick="appendOperator('*')">×</button>
+      
+      <button class="digit" onclick="appendNumber(4)">4</button>
+      <button class="digit" onclick="appendNumber(5)">5</button>
+      <button class="digit" onclick="appendNumber(6)">6</button>
+      <button class="operation" onclick="appendOperator('-')">-</button>
+      
+      <button class="digit" onclick="appendNumber(1)">1</button>
+      <button class="digit" onclick="appendNumber(2)">2</button>
+      <button class="digit" onclick="appendNumber(3)">3</button>
+      <button class="operation" onclick="appendOperator('+')">+</button>
+      
+      <button class="digit" onclick="appendNumber(0)">0</button>
+      <button class="digit" onclick="appendDecimalPoint()">.</button>
+      <button class="special" onclick="toggleSign()">+/-</button>
+      <button class="operation" onclick="calculate()">=</button>
+    </div>
+
+    <div class="button-group">
+      <button class="scientific" onclick="calculateSqrt()">√</button>
+      <button class="scientific" onclick="calculatePower()">x²</button>
+      <button class="scientific" onclick="calculateReciprocal()">1/x</button>
+      <button class="scientific" onclick="calculateFactorial()">n!</button>
+    </div>
+
+    <div class="history">
+      <h3>History</h3>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentInput = '';
+    let currentExpression = '';
+    let calculationHistory = [];
+    let isDarkMode = false;
+
+    function updateDisplay() {
+      document.getElementById('input').value = currentInput;
+      document.getElementById('expression').textContent = currentExpression;
+    }
+
+    function appendNumber(number) {
+      currentInput += number;
+      updateDisplay();
+    }
+
+    function appendOperator(operator) {
+      if (currentInput === '' && operator === '-') {
+        currentInput = '-';
+      } else if (currentInput !== '') {
+        currentExpression = currentInput + ' ' + operator + ' ';
+        currentInput = '';
+      }
+      updateDisplay();
+    }
+
+    function appendDecimalPoint() {
+      if (!currentInput.includes('.')) {
+        currentInput = currentInput === '' ? '0.' : currentInput + '.';
+      }
+      updateDisplay();
+    }
+
+    function clearInput() {
+      currentInput = '';
+      currentExpression = '';
+      document.getElementById('result').textContent = '0';
+      updateDisplay();
+    }
+
+    function backspace() {
+      currentInput = currentInput.slice(0, -1);
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (currentInput !== '') {
+        currentInput = currentInput.startsWith('-') 
+          ? currentInput.substring(1) 
+          : '-' + currentInput;
+        updateDisplay();
+      }
+    }
+
+    function calculatePercentage() {
+      if (currentInput !== '') {
+        const num = parseFloat(currentInput);
+        currentInput = (num / 100).toString();
+        updateDisplay();
+      }
+    }
+
+    function calculateSqrt() {
+      if (currentInput !== '') {
+        const num = parseFloat(currentInput);
+        if (num >= 0) {
+          const result = Math.sqrt(num);
+          addToHistory(`√(${num})`, result);
+          currentInput = result.toString();
+          currentExpression = '';
+          document.getElementById('result').textContent = result;
+          updateDisplay();
+        } else {
+          document.getElementById('result').textContent = 'Error';
+        }
+      }
+    }
+
+    function calculatePower() {
+      if (currentInput !== '') {
+        const num = parseFloat(currentInput);
+        const result = Math.pow(num, 2);
+        addToHistory(`${num}²`, result);
+        currentInput = result.toString();
+        currentExpression = '';
+        document.getElementById('result').textContent = result;
+        updateDisplay();
+      }
+    }
+
+    function calculateReciprocal() {
+      if (currentInput !== '' && currentInput !== '0') {
+        const num = parseFloat(currentInput);
+        const result = 1 / num;
+        addToHistory(`1/${num}`, result);
+        currentInput = result.toString();
+        currentExpression = '';
+        document.getElementById('result').textContent = result;
+        updateDisplay();
+      } else {
+        document.getElementById('result').textContent = 'Error';
+      }
+    }
+
+    function calculateFactorial() {
+      if (currentInput !== '') {
+        const num = parseInt(currentInput);
+        if (num >= 0 && Number.isInteger(num)) {
+          let result = 1;
+          for (let i = 2; i <= num; i++) {
+            result *= i;
+          }
+          addToHistory(`${num}!`, result);
+          currentInput = result.toString();
+          currentExpression = '';
+          document.getElementById('result').textContent = result;
+          updateDisplay();
+        } else {
+          document.getElementById('result').textContent = 'Error';
+        }
+      }
+    }
+
+    function calculate() {
+      try {
+        if (currentExpression !== '' && currentInput !== '') {
+          const fullExpression = currentExpression + currentInput;
+          const expressionToEval = fullExpression.replace(/×/g, '*').replace(/÷/g, '/');
+          const result = eval(expressionToEval);
+          
+          addToHistory(fullExpression, result);
+          
+          document.getElementById('result').textContent = result;
+          currentInput = result.toString();
+          currentExpression = '';
+          updateDisplay();
+        }
+      } catch (error) {
+        document.getElementById('result').textContent = 'Error';
+      }
+    }
+
+    function addToHistory(expression, result) {
+      calculationHistory.unshift({ expression, result });
+      if (calculationHistory.length > 5) {
+        calculationHistory.pop();
+      }
+      updateHistory();
+    }
+
+    function updateHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      
+      calculationHistory.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.classList.add('history-item');
+        historyItem.innerHTML = `
+          <span>${item.expression}</span>
+          <span>=</span>
+          <span>${item.result}</span>
+        `;
+        historyItem.addEventListener('click', () => {
+          currentInput = item.result.toString();
+          updateDisplay();
+        });
+        historyList.appendChild(historyItem);
+      });
+    }
+
+    function handleKeyInput(event) {
+      const input = event.target.value;
+      currentInput = input;
+      
+      if (event.key === 'Enter') {
+        calculate();
+      }
+    }
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode');
+      document.getElementById('theme-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+    }
+  </script>
+</body>
+</html>
